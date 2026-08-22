@@ -1,0 +1,3 @@
+customer_id,customer_name,city,loyalty_tier,is_active,email,updated_at
+C005,Nisha Verma,Kolkata,Bronze,true,nisha.verma@example.com,2026-01-04T09:00:00
+
