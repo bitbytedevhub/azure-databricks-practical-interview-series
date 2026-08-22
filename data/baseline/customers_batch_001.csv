@@ -1,0 +1,5 @@
+customer_id,customer_name,city,loyalty_tier,is_active,updated_at
+C001,Amit Sharma,Delhi,Gold,true,2026-01-01T09:00:00
+C002,Meera Iyer,Pune,Silver,true,2026-01-01T09:10:00
+C003,Sara Khan,Jaipur,Bronze,true,2026-01-01T09:20:00
+
