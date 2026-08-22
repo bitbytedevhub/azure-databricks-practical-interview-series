@@ -1,0 +1,4 @@
+event_id,customer_id,operation,customer_name,city,loyalty_tier,is_active,event_timestamp,sequence_number
+E0005,C003,UPDATE,Sara Khan,Bengaluru,Gold,true,2026-01-03T11:00:00,3
+E0004,C003,UPDATE,Sara Khan,Hyderabad,Silver,true,2026-01-03T10:00:00,2
+
