@@ -1,0 +1,16 @@
+bundle:
+  name: azure-databricks-practical-interview-series
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Existing Unity Catalog workspace catalog
+    default: master_databricks_new
+
+targets:
+  dev:
+    default: true
+    mode: development
+
