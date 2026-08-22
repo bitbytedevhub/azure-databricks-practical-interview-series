@@ -1,0 +1,20 @@
+resources:
+  jobs:
+    abb_retail_day1:
+      name: abb-retail-day1
+      tasks:
+        - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: ../notebooks/day1/02_bronze_ingestion.py
+            source: WORKSPACE
+            base_parameters:
+              catalog: ${var.catalog}
+
+        - task_key: validate_bronze
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: ../notebooks/day1/03_bronze_validation.py
+            source: WORKSPACE
+            base_parameters:
+              catalog: ${var.catalog}
