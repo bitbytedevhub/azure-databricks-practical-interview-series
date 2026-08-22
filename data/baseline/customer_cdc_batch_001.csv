@@ -1,0 +1,3 @@
+event_id,customer_id,operation,customer_name,city,loyalty_tier,is_active,event_timestamp,sequence_number
+E0001,C004,INSERT,Ravi Kumar,Chennai,Bronze,true,2026-01-01T11:00:00,1
+
