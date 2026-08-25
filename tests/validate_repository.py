@@ -15,7 +15,11 @@ REQUIRED_FILES = [
     "notebooks/day1/02_bronze_ingestion.py",
     "notebooks/day1/03_bronze_validation.py",
     "notebooks/day1/04_future_scenarios.py",
+    "notebooks/day2/01_bronze_ingestion.py",
+    "notebooks/day2/02_bronze_validation.py",
     "docs/day1-conversational-guide.md",
+    "docs/day2-part1-ingestion-guide.md",
+    "docs/day2-part2-validation-guide.md",
     "docs/production-mapping.md",
     "docs/workflow-setup.md",
 ]
@@ -110,7 +114,7 @@ def main() -> None:
     validate_required_files()
     validate_notebook_syntax()
     validate_csv_files()
-    print("PASS: Day 1 repository validation completed.")
+    print("PASS: Day 1 and Day 2 repository validation completed.")
 
 
 if __name__ == "__main__":
