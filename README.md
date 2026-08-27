@@ -4,7 +4,7 @@ A beginner-friendly, production-mapped Azure Databricks interview lab. Every con
 
 ## Current course boundary
 
-Day 1 now ends after the learner creates the three governed CSV datasets. Auto Loader, Bronze ingestion, validation, and rerun evidence begin on Day 2.
+Day 1 creates the governed CSV lab. Day 2 performs Auto Loader Bronze ingestion and validation. Day 3 activates Amit's CDC update and implements a rerunnable SCD Type 1 customer table in Silver.
 
 ## Day 1 outcome
 
@@ -26,6 +26,16 @@ By the end of Day 1, you will have:
 - inspect rescued records and business-key quality;
 - prove that rerunning ingestion does not process the same files again.
 
+## Day 3 outcome
+
+- activate Amit's Delhi-to-Mumbai update as a new immutable CDC file;
+- reuse the Day 2 customer CDC schema location and checkpoint;
+- ingest only the new CDC delivery into Bronze;
+- validate and order snapshot and CDC records deterministically;
+- apply SCD Type 1 with a conditional Delta MERGE;
+- prove that Silver contains one current Mumbai row for Amit;
+- prove that rerunning the MERGE creates no duplicate customer row.
+
 ## Repository structure
 
     notebooks/day1/
@@ -35,6 +45,11 @@ By the end of Day 1, you will have:
     notebooks/day2/
       01_bronze_ingestion.py
       02_bronze_validation.py
+    notebooks/day3/
+      01_activate_amit_update.py
+      02_ingest_amit_update.py
+      03_apply_scd_type1.py
+      04_validate_scd_type1.py
     data/
       baseline/
       future_scenarios/
@@ -42,6 +57,7 @@ By the end of Day 1, you will have:
       day1-conversational-guide.md
       day2-part1-ingestion-guide.md
       day2-part2-validation-guide.md
+      day3-scd-type1-guide.md
       production-mapping.md
       workflow-setup.md
     resources/day1_job.yml
@@ -52,7 +68,7 @@ By the end of Day 1, you will have:
 
 1. Open your Azure Databricks workspace.
 2. Open Catalog Explorer and find the catalog whose name matches your workspace.
-3. Import the Day 1 and Day 2 source notebooks.
+3. Import the Day 1, Day 2, and Day 3 source notebooks.
 4. Open 00_platform_bootstrap.
 5. Set the catalog widget to your existing workspace catalog.
 
@@ -68,9 +84,17 @@ The repository default is master_databricks_new. Change it if your catalog has a
             |
     day2/02_bronze_validation
             |
-    04_future_scenarios
+    day1/04_future_scenarios
+            |
+    day3/01_activate_amit_update
+            |
+    day3/02_ingest_amit_update
+            |
+    day3/03_apply_scd_type1
+            |
+    day3/04_validate_scd_type1
 
-Run 04_future_scenarios only to prepare files for later lessons. It does not copy those files into the active ingestion directories.
+Run `day1/04_future_scenarios` once to prepare files for later lessons. It does not copy those files into active ingestion directories. Day 3 activates only Amit's controlled update.
 
 ## Personal lab versus production
 
@@ -99,4 +123,3 @@ Run:
 ## Checkpoint safety
 
 Do not delete a streaming checkpoint while retaining its target Bronze table unless you deliberately intend to reprocess source files. A checkpoint reset and a target-table reset must be handled as one controlled development recovery procedure.
-
