@@ -17,9 +17,14 @@ REQUIRED_FILES = [
     "notebooks/day1/04_future_scenarios.py",
     "notebooks/day2/01_bronze_ingestion.py",
     "notebooks/day2/02_bronze_validation.py",
+    "notebooks/day3/01_activate_amit_update.py",
+    "notebooks/day3/02_ingest_amit_update.py",
+    "notebooks/day3/03_apply_scd_type1.py",
+    "notebooks/day3/04_validate_scd_type1.py",
     "docs/day1-conversational-guide.md",
     "docs/day2-part1-ingestion-guide.md",
     "docs/day2-part2-validation-guide.md",
+    "docs/day3-scd-type1-guide.md",
     "docs/production-mapping.md",
     "docs/workflow-setup.md",
 ]
@@ -110,13 +115,67 @@ def validate_csv_files() -> None:
             )
 
 
+def validate_day2_and_day3_contracts() -> None:
+    day2_ingestion = (
+        ROOT / "notebooks/day2/01_bronze_ingestion.py"
+    ).read_text(encoding="utf-8")
+    day3_ingestion = (
+        ROOT / "notebooks/day3/02_ingest_amit_update.py"
+    ).read_text(encoding="utf-8")
+    day3_scd1 = (
+        ROOT / "notebooks/day3/03_apply_scd_type1.py"
+    ).read_text(encoding="utf-8")
+
+    for name, source in {
+        "Day 2 ingestion": day2_ingestion,
+        "Day 3 CDC ingestion": day3_ingestion,
+    }.items():
+        required_patterns = [
+            '.format("cloudFiles")',
+            '.format("delta")',
+            'checkpointLocation',
+            'availableNow=True',
+            '.toTable(',
+        ]
+        missing = [
+            pattern
+            for pattern in required_patterns
+            if pattern not in source
+        ]
+        if missing:
+            raise AssertionError(
+                f"{name} is missing required patterns: {missing}"
+            )
+
+    scd1_patterns = [
+        "MERGE INTO",
+        "WHEN MATCHED",
+        "THEN UPDATE SET",
+        "WHEN NOT MATCHED THEN INSERT",
+        "sequence_number",
+        "row_number()",
+    ]
+    missing_scd1 = [
+        pattern
+        for pattern in scd1_patterns
+        if pattern not in day3_scd1
+    ]
+    if missing_scd1:
+        raise AssertionError(
+            f"Day 3 SCD Type 1 is missing patterns: {missing_scd1}"
+        )
+
+
 def main() -> None:
     validate_required_files()
     validate_notebook_syntax()
     validate_csv_files()
-    print("PASS: Day 1 and Day 2 repository validation completed.")
+    validate_day2_and_day3_contracts()
+    print(
+        "PASS: Day 1, Day 2, and Day 3 repository "
+        "validation completed."
+    )
 
 
 if __name__ == "__main__":
     main()
-
