@@ -15,16 +15,16 @@ REQUIRED_FILES = [
     "notebooks/day1/02_bronze_ingestion.py",
     "notebooks/day1/03_bronze_validation.py",
     "notebooks/day1/04_future_scenarios.py",
-    "notebooks/day2/01_bronze_ingestion.py",
-    "notebooks/day2/02_bronze_validation.py",
-    "notebooks/day3/01_activate_amit_update.py",
-    "notebooks/day3/02_ingest_amit_update.py",
-    "notebooks/day3/03_apply_scd_type1.py",
-    "notebooks/day3/04_validate_scd_type1.py",
+    "notebooks/day2_and_day3/01_bronze_ingestion.py",
+    "notebooks/day2_and_day3/02_bronze_validation.py",
+    "notebooks/day4/01_activate_amit_update.py",
+    "notebooks/day4/02_ingest_amit_update.py",
+    "notebooks/day4/03_apply_scd_type1.py",
+    "notebooks/day4/04_validate_scd_type1.py",
     "docs/day1-conversational-guide.md",
-    "docs/day2-part1-ingestion-guide.md",
-    "docs/day2-part2-validation-guide.md",
-    "docs/day3-scd-type1-guide.md",
+    "docs/day2-and-day3-part1-ingestion-guide.md",
+    "docs/day2-and-day3-part2-validation-guide.md",
+    "docs/day4-scd-type1-guide.md",
     "docs/production-mapping.md",
     "docs/workflow-setup.md",
 ]
@@ -115,20 +115,20 @@ def validate_csv_files() -> None:
             )
 
 
-def validate_day2_and_day3_contracts() -> None:
+def validate_day2_day3_and_day4_contracts() -> None:
     day2_ingestion = (
-        ROOT / "notebooks/day2/01_bronze_ingestion.py"
+        ROOT / "notebooks/day2_and_day3/01_bronze_ingestion.py"
     ).read_text(encoding="utf-8")
-    day3_ingestion = (
-        ROOT / "notebooks/day3/02_ingest_amit_update.py"
+    day4_ingestion = (
+        ROOT / "notebooks/day4/02_ingest_amit_update.py"
     ).read_text(encoding="utf-8")
-    day3_scd1 = (
-        ROOT / "notebooks/day3/03_apply_scd_type1.py"
+    day4_scd1 = (
+        ROOT / "notebooks/day4/03_apply_scd_type1.py"
     ).read_text(encoding="utf-8")
 
     for name, source in {
         "Day 2 ingestion": day2_ingestion,
-        "Day 3 CDC ingestion": day3_ingestion,
+        "Day 4 CDC ingestion": day4_ingestion,
     }.items():
         required_patterns = [
             '.format("cloudFiles")',
@@ -158,11 +158,11 @@ def validate_day2_and_day3_contracts() -> None:
     missing_scd1 = [
         pattern
         for pattern in scd1_patterns
-        if pattern not in day3_scd1
+        if pattern not in day4_scd1
     ]
     if missing_scd1:
         raise AssertionError(
-            f"Day 3 SCD Type 1 is missing patterns: {missing_scd1}"
+            f"Day 4 SCD Type 1 is missing patterns: {missing_scd1}"
         )
 
 
@@ -170,9 +170,9 @@ def main() -> None:
     validate_required_files()
     validate_notebook_syntax()
     validate_csv_files()
-    validate_day2_and_day3_contracts()
+    validate_day2_day3_and_day4_contracts()
     print(
-        "PASS: Day 1, Day 2, and Day 3 repository "
+        "PASS: Day 1 through Day 4 repository "
         "validation completed."
     )
 

@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Day 2 Part 1 - CSV to Bronze with Auto Loader
+# MAGIC # Day 2 - CSV to Bronze with Auto Loader
 # MAGIC
 # MAGIC Day 1 created three CSV datasets. This notebook incrementally ingests them into separate Bronze Delta tables. It does not create catalogs, schemas, or volumes, and it does not apply SCD logic.
 
@@ -280,5 +280,3 @@ display(spark.table(ORDERS_TABLE).limit(10))
 display(spark.table(CUSTOMER_CDC_TABLE).limit(10))
 
 print("PASS: Day 2 Bronze ingestion completed")
-
-

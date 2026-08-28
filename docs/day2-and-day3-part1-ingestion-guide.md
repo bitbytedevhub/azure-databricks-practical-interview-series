@@ -1,4 +1,4 @@
-# Day 2 Part 1 - Beginner recording guide
+# Day 2 - Auto Loader Bronze ingestion beginner recording guide
 
 ## Outcome
 
@@ -38,7 +38,7 @@ Every source gets a separate source directory, schema location, checkpoint, and 
 
 ## Recording order
 
-1. Open notebooks/day2/01_bronze_ingestion.py.
+1. Open notebooks/day2_and_day3/01_bronze_ingestion.py.
 2. Explain that CATALOG contains only master_databricks_new.
 3. Verify the catalog and Bronze/Ops schemas.
 4. Build Unity Catalog volume paths.
@@ -76,5 +76,3 @@ The source path, filename, size, modification time, ingestion timestamp, and run
 ## Stop point
 
 Stop after displaying the three Bronze tables. Do not activate Amit's move or apply SCD logic yet.
-
-

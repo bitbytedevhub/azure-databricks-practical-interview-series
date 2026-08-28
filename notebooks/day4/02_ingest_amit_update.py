@@ -1,8 +1,8 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Day 3 Part 2 - Incrementally ingest Amit's update
+# MAGIC # Day 4 Part 2 - Incrementally ingest Amit's update
 # MAGIC
-# MAGIC This notebook reuses the exact customer CDC source, schema location, checkpoint, and Bronze target established on Day 2. Auto Loader therefore processes only the new batch-002 file.
+# MAGIC This notebook reuses the exact customer CDC source, schema location, checkpoint, and Bronze target established during Day 2 & Day 3. Auto Loader therefore processes only the new batch-002 file.
 
 # COMMAND ----------
 
@@ -43,8 +43,8 @@ RUN_ID = str(uuid.uuid4())
 
 if not spark.catalog.tableExists(TARGET_TABLE):
     raise RuntimeError(
-        f"Day 2 target {TARGET_TABLE} does not exist. "
-        "Complete Day 2 Bronze ingestion first."
+        f"Day 2 & Day 3 target {TARGET_TABLE} does not exist. "
+        "Complete the Day 2 & Day 3 Bronze lab first."
     )
 
 before_count = spark.table(TARGET_TABLE).count()
@@ -124,6 +124,5 @@ display(
 
 print(
     "PASS: Amit's update is in Bronze. A no-file-change rerun "
-    "will add zero rows because the Day 2 checkpoint was reused."
+    "will add zero rows because the Day 2 & Day 3 checkpoint was reused."
 )
-

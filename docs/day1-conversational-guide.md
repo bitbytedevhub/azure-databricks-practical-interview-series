@@ -223,4 +223,4 @@ Today we did not implement SCD Type 1 or SCD Type 2.
 
 We built the environment those solutions require: governed storage, reproducible CSV deliveries, incremental Bronze ingestion, operational metadata, rescued-data inspection, validation, and rerun evidence.
 
-In Day 2, we will ingest the three CSV streams into Bronze with Auto Loader and prove checkpoint-based rerun safety. In Day 3, Amit will move from Delhi to Mumbai. We will implement SCD Type 1, prove that Delhi was replaced, and discuss when losing history is acceptable.
+In Day 2, we will ingest the three CSV streams into Bronze with Auto Loader. In Day 3, we will validate the Bronze tables and prove checkpoint-based rerun safety. In Day 4, Amit will move from Delhi to Mumbai. We will implement SCD Type 1, prove that Delhi was replaced, and discuss when losing history is acceptable.

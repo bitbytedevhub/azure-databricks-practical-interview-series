@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Day 2 Part 2 - Bronze validation and rerun evidence
+# MAGIC # Day 3 - Bronze validation and rerun evidence
 # MAGIC
 # MAGIC A successful ingestion cell is not enough. This notebook proves table existence, baseline counts, source contracts, metadata, file coverage, rescued data, business-key quality, and safe file-level reruns.
 
@@ -381,5 +381,3 @@ for table_name in REQUIRED_TABLES:
 display(
     spark.createDataFrame(validation_summary)
 )
-
-

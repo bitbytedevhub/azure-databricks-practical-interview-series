@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Day 3 Part 3 - Apply SCD Type 1 in Silver
+# MAGIC # Day 4 Part 3 - Apply SCD Type 1 in Silver
 # MAGIC
 # MAGIC SCD Type 1 keeps one current row per customer. When Amit moves from Delhi to Mumbai, the Silver business row is overwritten. The table does not retain Delhi as a second business-history row.
 
@@ -96,7 +96,7 @@ if unsupported_operations:
         for row in unsupported_operations
     )
     raise ValueError(
-        "Day 3 handles INSERT and UPDATE only. Found unsupported "
+        "Day 4 handles INSERT and UPDATE only. Found unsupported "
         f"operations {values}. Apply the later delete-policy lesson "
         "before processing these events."
     )

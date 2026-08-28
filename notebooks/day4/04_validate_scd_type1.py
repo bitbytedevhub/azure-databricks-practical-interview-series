@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Day 3 Part 4 - Validate SCD Type 1
+# MAGIC # Day 4 Part 4 - Validate SCD Type 1
 # MAGIC
 # MAGIC A successful MERGE is not enough. This notebook proves that Amit now has one current row, Mumbai replaced Delhi, the baseline customers remain correct, and rerunning the MERGE does not create duplicates.
 
@@ -134,8 +134,7 @@ display(
 )
 
 print(
-    "PASS: Day 3 SCD Type 1 is correct and rerunnable. "
+    "PASS: Day 4 SCD Type 1 is correct and rerunnable. "
     "The business table keeps current state; Delta transaction "
     "history is operational history, not an SCD Type 2 model."
 )
-

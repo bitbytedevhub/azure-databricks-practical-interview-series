@@ -1,4 +1,4 @@
-# Day 3 - SCD Type 1 beginner recording guide
+# Day 4 - SCD Type 1 beginner recording guide
 
 ## Interview problem
 
@@ -45,11 +45,11 @@ What happens on a rerun?
 
 The activation notebook compares an existing batch-002 file with the prepared scenario. Identical content is skipped. Different content under the same filename fails instead of being silently overwritten.
 
-## Step 2 - Reuse the Day 2 checkpoint
+## Step 2 - Reuse the Day 2 & Day 3 checkpoint
 
 Presenter:
 
-The source path, schema location, checkpoint, and Bronze target must be exactly the same as Day 2:
+The source path, schema location, checkpoint, and Bronze target must be exactly the same as the Day 2 & Day 3 Bronze pipeline:
 
     Source:     incoming_files/customer_cdc
     Schema:     pipeline_state/schemas/customer_cdc
@@ -133,7 +133,7 @@ SCD Type 1 does not preserve historical business rows. Delta Lake may still reta
 
 ## Why not process DELETE yet?
 
-Delete behavior is a separate business contract. A source delete might mean physical deletion, soft deletion, anonymization, or account closure. Day 3 deliberately fails if a DELETE event is present rather than silently choosing a policy.
+Delete behavior is a separate business contract. A source delete might mean physical deletion, soft deletion, anonymization, or account closure. Day 4 deliberately fails if a DELETE event is present rather than silently choosing a policy.
 
 ## Production mapping
 
@@ -142,4 +142,3 @@ This lab recomputes the latest source state from tiny Bronze tables for clarity.
 ## Closing script
 
 Today we converted raw snapshots and CDC events into one trusted current-state customer table. Amit moved from Delhi to Mumbai, and SCD Type 1 replaced the old value instead of creating a second row. We used sequence-aware ordering, a conditional Delta MERGE, data-contract checks, and rerun validation. That is the difference between knowing the SCD Type 1 definition and implementing it safely.
-

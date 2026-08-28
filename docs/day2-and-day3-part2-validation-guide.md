@@ -1,4 +1,4 @@
-# Day 2 Part 2 - Beginner recording guide
+# Day 3 - Bronze validation and idempotency beginner recording guide
 
 ## Opening
 
@@ -56,7 +56,7 @@ For the baseline, customer_id, order_id, and event_id must be populated. Duplica
 
 ## Rerun demonstration
 
-1. Capture counts in notebooks/day2/02_bronze_validation.py.
+1. Capture counts in notebooks/day2_and_day3/02_bronze_validation.py.
 2. Rerun 01_bronze_ingestion without adding or changing files.
 3. Return without rerunning the before-count cell.
 4. Capture after counts.
@@ -78,6 +78,4 @@ Deleting only a checkpoint while retaining its Bronze target can cause old files
 
 ## Stop point
 
-Stop after the validation summary and rerun proof. The next part activates Amit's Delhi-to-Mumbai update and begins the SCD problem.
-
-
+Stop after the validation summary and rerun proof. Day 4 activates Amit's Delhi-to-Mumbai update and begins the SCD problem.

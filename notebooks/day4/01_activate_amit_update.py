@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Day 3 Part 1 - Activate Amit's CDC update
+# MAGIC # Day 4 Part 1 - Activate Amit's CDC update
 # MAGIC
 # MAGIC Day 1 prepared future scenarios outside the active landing directory. This notebook safely copies only Amit's Delhi-to-Mumbai update into the customer CDC inbox. Rerunning it does not create another delivery.
 
@@ -103,5 +103,4 @@ for column_name, expected_value in expected.items():
         )
 
 display(activated_df)
-print("PASS: Day 3 CDC scenario is active and safe to rerun")
-
+print("PASS: Day 4 CDC scenario is active and safe to rerun")
