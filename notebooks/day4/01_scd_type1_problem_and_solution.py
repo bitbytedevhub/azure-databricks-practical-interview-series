@@ -102,10 +102,12 @@ snapshot_df = (
         F.trim("customer_name").alias("customer_name"),
         F.trim("city").alias("city"),
         F.trim("loyalty_tier").alias("loyalty_tier"),
-        (
-            F.when(F.lower(F.trim("is_active")) == "true", True)
-            .otherwise(False)
-        ).alias("is_active"),
+        F.when(
+            F.lower(
+                F.trim(F.col("is_active").cast("string"))
+            ).isin("true", "1", "yes", "y"),
+            F.lit(True),
+        ).otherwise(F.lit(False)).alias("is_active"),
         F.lit("SNAPSHOT").alias("operation"),
         F.to_timestamp("updated_at").alias("event_timestamp"),
         F.lit(0).cast("long").alias("sequence_number"),
@@ -128,10 +130,12 @@ cdc_df = (
         F.trim("customer_name").alias("customer_name"),
         F.trim("city").alias("city"),
         F.trim("loyalty_tier").alias("loyalty_tier"),
-        (
-            F.when(F.lower(F.trim("is_active")) == "true", True)
-            .otherwise(False)
-        ).alias("is_active"),
+        F.when(
+            F.lower(
+                F.trim(F.col("is_active").cast("string"))
+            ).isin("true", "1", "yes", "y"),
+            F.lit(True),
+        ).otherwise(F.lit(False)).alias("is_active"),
         F.upper(F.trim("operation")).alias("operation"),
         F.to_timestamp("event_timestamp").alias("event_timestamp"),
         F.col("sequence_number").cast("long").alias("sequence_number"),
