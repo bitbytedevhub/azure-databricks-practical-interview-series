@@ -4,7 +4,7 @@ A beginner-friendly, production-mapped Azure Databricks interview lab. Every con
 
 ## Current course boundary
 
-Day 1 creates the governed CSV lab. Day 2 performs Auto Loader Bronze ingestion. Day 3 validates Bronze ingestion and proves checkpoint-based idempotency. Day 4 activates Amit's CDC update and implements a rerunnable SCD Type 1 customer table in Silver.
+Day 1 creates the governed CSV lab. Day 2 performs Auto Loader Bronze ingestion. Day 3 validates Bronze ingestion and proves checkpoint-based idempotency. Day 4 focuses on the SCD Type 1 interview problem: replace Amit's Delhi value with the newer Mumbai CDC event in Silver.
 
 ## Day 1 outcome
 
@@ -30,13 +30,14 @@ Day 2 focuses on ingestion. Day 3 focuses on validation, checkpoints, and rerun 
 
 ## Day 4 outcome
 
-- activate Amit's Delhi-to-Mumbai update as a new immutable CDC file;
-- reuse the Day 2 & Day 3 customer CDC schema location and checkpoint;
-- ingest only the new CDC delivery into Bronze;
-- validate and order snapshot and CDC records deterministically;
+- upload the provided `customer_cdc_batch_002.csv` file and ingest it with the existing Day 2 Auto Loader notebook;
+- display the Delhi snapshot and Mumbai CDC event as the business problem;
+- give snapshot and CDC rows one comparable structure;
+- select one deterministic latest record per customer;
 - apply SCD Type 1 with a conditional Delta MERGE;
 - prove that Silver contains one current Mumbai row for Amit;
-- prove that rerunning the MERGE creates no duplicate customer row.
+- explain why Bronze preserves both source states while Silver keeps only the current business state;
+- prove that rerunning the same source state creates no duplicate customer row.
 
 ## Repository structure
 
@@ -48,12 +49,11 @@ Day 2 focuses on ingestion. Day 3 focuses on validation, checkpoints, and rerun 
       01_bronze_ingestion.py
       02_bronze_validation.py
     notebooks/day4/
-      01_activate_amit_update.py
-      02_ingest_amit_update.py
-      03_apply_scd_type1.py
-      04_validate_scd_type1.py
+      01_scd_type1_problem_and_solution.py
     data/
       baseline/
+      day4/
+        customer_cdc_batch_002.csv
       future_scenarios/
     docs/
       day1-conversational-guide.md
@@ -86,17 +86,13 @@ The repository default is master_databricks_new. Change it if your catalog has a
             |
     day2_and_day3/02_bronze_validation
             |
-    day1/04_future_scenarios
+    upload data/day4/customer_cdc_batch_002.csv
             |
-    day4/01_activate_amit_update
+    rerun day2_and_day3/01_bronze_ingestion
             |
-    day4/02_ingest_amit_update
-            |
-    day4/03_apply_scd_type1
-            |
-    day4/04_validate_scd_type1
+    day4/01_scd_type1_problem_and_solution
 
-Run `day1/04_future_scenarios` once to prepare files for later lessons. It does not copy those files into active ingestion directories. Day 4 activates only Amit's controlled update.
+If Bronze already contains event `E0002`, skip the Day 4 upload and ingestion rerun. The Day 4 notebook intentionally assumes the Day 1-Day 3 lab exists and removes platform prerequisite checks so the lesson stays focused on SCD Type 1.
 
 ## Personal lab versus production
 

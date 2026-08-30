@@ -17,10 +17,8 @@ REQUIRED_FILES = [
     "notebooks/day1/04_future_scenarios.py",
     "notebooks/day2_and_day3/01_bronze_ingestion.py",
     "notebooks/day2_and_day3/02_bronze_validation.py",
-    "notebooks/day4/01_activate_amit_update.py",
-    "notebooks/day4/02_ingest_amit_update.py",
-    "notebooks/day4/03_apply_scd_type1.py",
-    "notebooks/day4/04_validate_scd_type1.py",
+    "notebooks/day4/01_scd_type1_problem_and_solution.py",
+    "data/day4/customer_cdc_batch_002.csv",
     "docs/day1-conversational-guide.md",
     "docs/day2-and-day3-part1-ingestion-guide.md",
     "docs/day2-and-day3-part2-validation-guide.md",
@@ -46,6 +44,11 @@ CSV_EXPECTATIONS = {
         "ids": {"E0001"},
     },
     "data/future_scenarios/amit_move_to_mumbai.csv": {
+        "rows": 1,
+        "key": "event_id",
+        "ids": {"E0002"},
+    },
+    "data/day4/customer_cdc_batch_002.csv": {
         "rows": 1,
         "key": "event_id",
         "ids": {"E0002"},
@@ -119,33 +122,27 @@ def validate_day2_day3_and_day4_contracts() -> None:
     day2_ingestion = (
         ROOT / "notebooks/day2_and_day3/01_bronze_ingestion.py"
     ).read_text(encoding="utf-8")
-    day4_ingestion = (
-        ROOT / "notebooks/day4/02_ingest_amit_update.py"
-    ).read_text(encoding="utf-8")
     day4_scd1 = (
-        ROOT / "notebooks/day4/03_apply_scd_type1.py"
+        ROOT / "notebooks/day4/01_scd_type1_problem_and_solution.py"
     ).read_text(encoding="utf-8")
 
-    for name, source in {
-        "Day 2 ingestion": day2_ingestion,
-        "Day 4 CDC ingestion": day4_ingestion,
-    }.items():
-        required_patterns = [
-            '.format("cloudFiles")',
-            '.format("delta")',
-            'checkpointLocation',
-            'availableNow=True',
-            '.toTable(',
-        ]
-        missing = [
-            pattern
-            for pattern in required_patterns
-            if pattern not in source
-        ]
-        if missing:
-            raise AssertionError(
-                f"{name} is missing required patterns: {missing}"
-            )
+    required_ingestion_patterns = [
+        '.format("cloudFiles")',
+        '.format("delta")',
+        'checkpointLocation',
+        'availableNow=True',
+        '.toTable(',
+    ]
+    missing_ingestion = [
+        pattern
+        for pattern in required_ingestion_patterns
+        if pattern not in day2_ingestion
+    ]
+    if missing_ingestion:
+        raise AssertionError(
+            "Day 2 ingestion is missing required patterns: "
+            f"{missing_ingestion}"
+        )
 
     scd1_patterns = [
         "MERGE INTO",
@@ -154,6 +151,8 @@ def validate_day2_day3_and_day4_contracts() -> None:
         "WHEN NOT MATCHED THEN INSERT",
         "sequence_number",
         "row_number()",
+        "unionByName",
+        "createOrReplaceTempView",
     ]
     missing_scd1 = [
         pattern
@@ -163,6 +162,26 @@ def validate_day2_day3_and_day4_contracts() -> None:
     if missing_scd1:
         raise AssertionError(
             f"Day 4 SCD Type 1 is missing patterns: {missing_scd1}"
+        )
+
+    removed_prerequisite_checks = [
+        "tableExists(",
+        "re.fullmatch",
+        "unsupported_operations",
+        "invalid_rows",
+        "raise RuntimeError",
+        "raise ValueError",
+        "raise AssertionError",
+    ]
+    unexpected_checks = [
+        pattern
+        for pattern in removed_prerequisite_checks
+        if pattern in day4_scd1
+    ]
+    if unexpected_checks:
+        raise AssertionError(
+            "Day 4 should focus on the SCD Type 1 problem and solution. "
+            f"Found removed prerequisite checks: {unexpected_checks}"
         )
 
 

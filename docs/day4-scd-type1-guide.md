@@ -1,144 +1,119 @@
-# Day 4 - SCD Type 1 beginner recording guide
+# Day 4 — SCD Type 1 problem-and-solution guide
 
-## Interview problem
+## Today’s interview question
 
-An interviewer says:
+**How would you implement SCD Type 1 when a customer’s latest details arrive through CDC?**
 
-> Amit currently lives in Delhi. A CDC update says he moved to Mumbai. Build an SCD Type 1 table, prove the result, and explain what happens when the job runs twice.
+Day 4 assumes that the Day 1–3 lab is already ready. The catalog, Bronze tables, volume, Auto Loader notebook, schema location, and checkpoint location already exist. We therefore do not repeat catalog checks, table-existence checks, permission checks, or other platform setup. This class stays focused on the SCD Type 1 problem and its solution.
 
-## Outcome
+## What the learner needs
 
-Start with:
+Use the upload-ready file:
 
-    Bronze customers snapshot: C001 = Delhi
-    CDC event E0002:          C001 = Mumbai, sequence 2
+`data/day4/customer_cdc_batch_002.csv`
 
-Finish with:
+Upload it to the existing customer CDC incoming folder:
 
-    Silver customer_current:  C001 = Mumbai
-    Rows for C001:            exactly 1
-    Old Delhi business row:   removed
+`/Volumes/<your-catalog>/abb_retail_bronze/incoming_files/customer_cdc/`
 
-SCD Type 1 keeps only the latest business state. It does not add effective dates or preserve a second historical row.
+Then rerun the existing Bronze ingestion notebook:
 
-## Notebook order
+`notebooks/day2_and_day3/01_bronze_ingestion.py`
 
-    01_activate_amit_update
-              |
-    02_ingest_amit_update
-              |
-    03_apply_scd_type1
-              |
-    04_validate_scd_type1
+Auto Loader will discover the new file and append its event to the existing Bronze CDC table. If event `E0002` is already visible in the Bronze CDC table, skip the upload and ingestion steps and begin directly with the Day 4 notebook.
 
-## Step 1 - Activate one immutable delivery
+## Notebook to create or import
 
-Presenter:
+Use this single notebook for the entire lesson:
 
-Day 1 prepared Amit's update outside the active CDC inbox. We now copy it into the inbox as `customer_cdc_batch_002.csv`.
+`notebooks/day4/01_scd_type1_problem_and_solution.py`
 
-Why copy instead of editing batch 001?
+The catalog variable near the beginning is set to `master_databricks_new`. Change only that value if the learner used a different catalog name during the earlier lab setup.
 
-Production source files should be treated as immutable deliveries. Overwriting an already processed filename makes recovery and audit evidence ambiguous. A new delivery receives a new filename.
+## The production-style scenario
 
-What happens on a rerun?
+The original customer snapshot says that Amit (`C001`) lives in Delhi. A later CDC event, `E0002`, says that Amit now lives in Mumbai and has sequence number `2`.
 
-The activation notebook compares an existing batch-002 file with the prepared scenario. Identical content is skipped. Different content under the same filename fails instead of being silently overwritten.
+The business wants a current customer table. It does not want both Delhi and Mumbai to appear as active versions. In SCD Type 1, the latest value replaces the old value in Silver, so the expected current state is one row for Amit with `city = Mumbai`.
 
-## Step 2 - Reuse the Day 2 & Day 3 checkpoint
+This mirrors a common production requirement: operational systems send changes after the initial snapshot, while reporting teams need one current version of each customer.
 
-Presenter:
+## Step-by-step teaching flow
 
-The source path, schema location, checkpoint, and Bronze target must be exactly the same as the Day 2 & Day 3 Bronze pipeline:
+### 1. Show the problem before writing the solution
 
-    Source:     incoming_files/customer_cdc
-    Schema:     pipeline_state/schemas/customer_cdc
-    Checkpoint: pipeline_state/checkpoints/customer_cdc
-    Target:     abb_retail_bronze.customer_cdc_raw
+Display Amit’s record from the Bronze snapshot and event `E0002` from the Bronze CDC table. This lets the viewer see the conflict clearly:
 
-Why reuse the checkpoint?
+- Snapshot: Amit is in Delhi.
+- CDC: Amit has changed to Mumbai.
 
-The checkpoint already remembers batch 001. Auto Loader therefore discovers batch 002 and appends only E0002. A new checkpoint would forget the earlier progress and could process both files again.
+The learner should understand the business question before seeing a `MERGE` statement.
 
-Why does Bronze still append?
+### 2. Put snapshot and CDC rows into one common shape
 
-Bronze records what arrived. It should not overwrite Amit's earlier customer snapshot. The current-state business decision belongs in Silver.
+Select the same business columns from both sources. Give the snapshot a starting sequence number of `0`; the CDC event already has a later sequence number.
 
-## Step 3 - Establish the Silver contract
+Why? Spark can compare and combine the rows reliably only when both DataFrames have a compatible structure. The sequence gives us an explicit way to decide which version is newer.
 
-Presenter:
+### 3. Combine the candidates
 
-Bronze keeps strings because it preserves source evidence. Silver converts values deliberately:
+Use `unionByName` to place the snapshot and CDC candidates into one DataFrame.
 
-- `is_active` becomes Boolean;
-- timestamps become `TIMESTAMP`;
-- `sequence_number` becomes `BIGINT`;
-- blank keys and invalid types fail validation.
+Why `unionByName`? It aligns values using column names. A positional union can silently place values under the wrong column if the column order differs.
 
-Why validate before MERGE?
+### 4. Select the latest row for every customer
 
-A technically successful cast can produce null. Merging a null timestamp or sequence number would make event ordering unreliable.
+Use a window partitioned by `customer_id`. Order by sequence number and event time in descending order, then assign `row_number()`.
 
-## Step 4 - Select one latest source row
+Keep only row number `1`. This produces one deterministic latest candidate for each customer before the merge.
 
-Presenter:
+Why do this before `MERGE`? A source batch can contain several events for the same customer. Sending all of them directly into one merge can create ambiguity and may fail because several source rows try to modify the same target row.
 
-Delta MERGE requires a deterministic source. If two source rows match the same target customer, the operation can be ambiguous.
+### 5. Create a temporary view
 
-We partition by `customer_id` and order by:
+Expose the latest-customer DataFrame as a temporary view so that the SQL `MERGE` can read it.
 
-1. sequence number descending;
-2. event timestamp descending;
-3. Bronze ingestion timestamp descending;
-4. source event ID descending.
+The view is only a notebook-session bridge between PySpark and SQL. It is not another permanent layer or a duplicate table.
 
-Sequence number is the primary rule because arrival order is not business order. A late event can arrive tomorrow while representing an older change.
+### 6. Create the Silver current-state table
 
-## Step 5 - Apply the SCD Type 1 MERGE
+Create the Delta table if it does not yet exist. This is the SCD Type 1 target and contains one current row per customer.
 
-Presenter:
+This is solution logic, not a platform prevalidation. It allows the same lesson to demonstrate the initial load and later updates using one target.
 
-The MERGE has two business paths:
+### 7. Apply the SCD Type 1 merge
 
-    Customer exists + source is newer -> UPDATE
-    Customer does not exist           -> INSERT
+Match source and target using `customer_id`.
 
-For Amit, C001 already exists. Sequence 2 is newer than the snapshot's sequence 0, so Delhi is overwritten by Mumbai.
+- When the customer exists and the source sequence is newer, update the current row.
+- When the customer does not exist, insert a new row.
+- When the source is not newer, do nothing.
 
-Why not update every matched row?
+The sequence condition matters. Without it, a delayed older event could overwrite a newer value and incorrectly move Amit back to Delhi.
 
-An unconditional update would allow an older or identical event to rewrite the row during a retry. The matched condition accepts only a strictly newer ordered event.
+### 8. Prove the business result
 
-What happens when the MERGE runs twice?
+Display Amit from the Silver table. The result should contain exactly one current row and the city should be Mumbai.
 
-The same E0002 event has the same sequence, timestamp, and event ID. It is not newer, so the second MERGE makes no business change and creates no duplicate customer row.
+Then compare the layers:
 
-## Step 6 - Validate the business outcome
+- Bronze still preserves the original Delhi snapshot and the Mumbai CDC event.
+- Silver contains only Amit’s latest current state: Mumbai.
 
-The validation notebook proves:
+This distinction is important in an interview. SCD Type 1 overwrites history in the current-state target; it does not erase the raw history preserved in Bronze.
 
-    customer_current row count = 4
-    distinct customer IDs      = 4
-    C001 row count              = 1
-    C001 city                   = Mumbai
-    C001 sequence               = 2
-    C001 source event           = E0002
-    C001 Delhi rows             = 0
+### 9. Rerun the notebook
 
-It also displays Delta history and confirms that a MERGE occurred.
+Run the Day 4 notebook again. The matched condition updates only when the incoming sequence number is greater than the stored sequence number, so the same event does not create another customer row or replace the row with an older version.
 
-## Important interview nuance
+Be precise: this rerun safety comes from the conditional Delta `MERGE`. Auto Loader checkpointing protected the earlier file-ingestion step from rereading the same discovered file.
 
-SCD Type 1 does not preserve historical business rows. Delta Lake may still retain older physical table versions for a configured retention period, but Delta time travel is not a substitute for an SCD Type 2 model. Type 2 explicitly exposes business history with effective dates and current-row indicators.
+## What was intentionally removed from Day 4
 
-## Why not process DELETE yet?
+The earlier version included catalog-name validation, table-existence checks, unsupported-operation checks, invalid-row checks, and a separate assertion notebook. Those are useful production controls, but repeating them here distracts from the interview problem.
 
-Delete behavior is a separate business contract. A source delete might mean physical deletion, soft deletion, anonymization, or account closure. Day 4 deliberately fails if a DELETE event is present rather than silently choosing a policy.
+In a real pipeline, governance, data-quality checks, monitoring, quarantine handling, and alerting would still be added around this transformation. They are separate engineering concerns and can be taught in later episodes.
 
-## Production mapping
+## Short presenter conclusion
 
-This lab recomputes the latest source state from tiny Bronze tables for clarity. A production pipeline may process only new CDC increments, record batch control totals, quarantine invalid events, apply expectations, monitor MERGE metrics, and serialize concurrent writes to the same target.
-
-## Closing script
-
-Today we converted raw snapshots and CDC events into one trusted current-state customer table. Amit moved from Delhi to Mumbai, and SCD Type 1 replaced the old value instead of creating a second row. We used sequence-aware ordering, a conditional Delta MERGE, data-contract checks, and rerun validation. That is the difference between knowing the SCD Type 1 definition and implementing it safely.
+“Today we solved a real SCD Type 1 problem. Bronze showed two versions of Amit: the original Delhi snapshot and a later Mumbai change. We ranked the candidates, kept the latest version, and used a conditional Delta merge to maintain one current Silver row. Amit is now in Mumbai in Silver, while Bronze still preserves the source history. That is the key SCD Type 1 distinction to explain in an interview.”
