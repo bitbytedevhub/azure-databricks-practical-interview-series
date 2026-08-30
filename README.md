@@ -4,7 +4,7 @@ A beginner-friendly, production-mapped Azure Databricks interview lab. Every con
 
 ## Current course boundary
 
-Day 1 creates the governed CSV lab. Day 2 performs Auto Loader Bronze ingestion. Day 3 validates Bronze ingestion and proves checkpoint-based idempotency. Day 4 focuses on the SCD Type 1 interview problem: replace Amit's Delhi value with the newer Mumbai CDC event in Silver.
+Day 1 creates the governed CSV lab. Day 2 performs Auto Loader Bronze ingestion. Day 3 validates Bronze ingestion and proves checkpoint-based idempotency. Day 4 solves SCD Type 1 by replacing Amit's Delhi value with Mumbai. Day 5 solves SCD Type 2 by preserving Delhi as history and inserting Mumbai as the current version.
 
 ## Day 1 outcome
 
@@ -39,6 +39,17 @@ Day 2 focuses on ingestion. Day 3 focuses on validation, checkpoints, and rerun 
 - explain why Bronze preserves both source states while Silver keeps only the current business state;
 - prove that rerunning the same source state creates no duplicate customer row.
 
+## Day 5 outcome
+
+- explain why SCD Type 2 stores multiple versions for one business key;
+- initialize customer history from the existing Bronze snapshot;
+- generate deterministic surrogate keys for repeatable versions;
+- deduplicate CDC records using the business event ID;
+- reject same or older events using sequence, timestamp, and event ID ordering;
+- stage one row to close the current version and one row to insert the new version;
+- close Amit's Delhi record and insert Mumbai as the new current record;
+- prove that rerunning the same event creates no duplicate history version.
+
 ## Repository structure
 
     notebooks/day1/
@@ -50,6 +61,8 @@ Day 2 focuses on ingestion. Day 3 focuses on validation, checkpoints, and rerun 
       02_bronze_validation.py
     notebooks/day4/
       01_scd_type1_problem_and_solution.py
+    notebooks/day5/
+      01_scd_type2_problem_and_solution.py
     data/
       baseline/
       day4/
@@ -60,6 +73,7 @@ Day 2 focuses on ingestion. Day 3 focuses on validation, checkpoints, and rerun 
       day2-and-day3-part1-ingestion-guide.md
       day2-and-day3-part2-validation-guide.md
       day4-scd-type1-guide.md
+      day5-scd-type2-guide.md
       production-mapping.md
       workflow-setup.md
     resources/day1_job.yml
@@ -70,7 +84,7 @@ Day 2 focuses on ingestion. Day 3 focuses on validation, checkpoints, and rerun 
 
 1. Open your Azure Databricks workspace.
 2. Open Catalog Explorer and find the catalog whose name matches your workspace.
-3. Import the Day 1, Day 2 & Day 3, and Day 4 source notebooks.
+3. Import the Day 1 through Day 5 source notebooks.
 4. Open 00_platform_bootstrap.
 5. Set the catalog widget to your existing workspace catalog.
 
@@ -91,8 +105,10 @@ The repository default is master_databricks_new. Change it if your catalog has a
     rerun day2_and_day3/01_bronze_ingestion
             |
     day4/01_scd_type1_problem_and_solution
+            |
+    day5/01_scd_type2_problem_and_solution
 
-If Bronze already contains event `E0002`, skip the Day 4 upload and ingestion rerun. The Day 4 notebook intentionally assumes the Day 1-Day 3 lab exists and removes platform prerequisite checks so the lesson stays focused on SCD Type 1.
+If Bronze already contains event `E0002`, skip the Day 4 upload and ingestion rerun. Day 4 intentionally stays focused on SCD Type 1. Day 5 reuses the same snapshot and event in a separate `customer_history` table, so no additional source file is required.
 
 ## Personal lab versus production
 

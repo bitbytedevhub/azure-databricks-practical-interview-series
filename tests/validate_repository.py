@@ -18,11 +18,13 @@ REQUIRED_FILES = [
     "notebooks/day2_and_day3/01_bronze_ingestion.py",
     "notebooks/day2_and_day3/02_bronze_validation.py",
     "notebooks/day4/01_scd_type1_problem_and_solution.py",
+    "notebooks/day5/01_scd_type2_problem_and_solution.py",
     "data/day4/customer_cdc_batch_002.csv",
     "docs/day1-conversational-guide.md",
     "docs/day2-and-day3-part1-ingestion-guide.md",
     "docs/day2-and-day3-part2-validation-guide.md",
     "docs/day4-scd-type1-guide.md",
+    "docs/day5-scd-type2-guide.md",
     "docs/production-mapping.md",
     "docs/workflow-setup.md",
 ]
@@ -118,12 +120,15 @@ def validate_csv_files() -> None:
             )
 
 
-def validate_day2_day3_and_day4_contracts() -> None:
+def validate_day2_through_day5_contracts() -> None:
     day2_ingestion = (
         ROOT / "notebooks/day2_and_day3/01_bronze_ingestion.py"
     ).read_text(encoding="utf-8")
     day4_scd1 = (
         ROOT / "notebooks/day4/01_scd_type1_problem_and_solution.py"
+    ).read_text(encoding="utf-8")
+    day5_scd2 = (
+        ROOT / "notebooks/day5/01_scd_type2_problem_and_solution.py"
     ).read_text(encoding="utf-8")
 
     required_ingestion_patterns = [
@@ -184,14 +189,39 @@ def validate_day2_day3_and_day4_contracts() -> None:
             f"Found removed prerequisite checks: {unexpected_checks}"
         )
 
+    scd2_patterns = [
+        "customer_history",
+        "customer_sk",
+        "effective_from",
+        "effective_to",
+        "is_current",
+        "left_anti",
+        "row_number()",
+        "merge_customer_id",
+        "unionByName",
+        "MERGE INTO",
+        "WHEN MATCHED",
+        "target.is_current = FALSE",
+        "WHEN NOT MATCHED THEN INSERT",
+    ]
+    missing_scd2 = [
+        pattern
+        for pattern in scd2_patterns
+        if pattern not in day5_scd2
+    ]
+    if missing_scd2:
+        raise AssertionError(
+            f"Day 5 SCD Type 2 is missing patterns: {missing_scd2}"
+        )
+
 
 def main() -> None:
     validate_required_files()
     validate_notebook_syntax()
     validate_csv_files()
-    validate_day2_day3_and_day4_contracts()
+    validate_day2_through_day5_contracts()
     print(
-        "PASS: Day 1 through Day 4 repository "
+        "PASS: Day 1 through Day 5 repository "
         "validation completed."
     )
 
