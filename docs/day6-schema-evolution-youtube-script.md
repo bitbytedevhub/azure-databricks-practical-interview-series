@@ -671,4 +671,3 @@ Remember this:
 - Schema evolution in Azure Databricks: https://learn.microsoft.com/en-us/azure/databricks/data-engineering/schema-evolution
 - Auto Loader best practices: https://learn.microsoft.com/en-us/azure/databricks/ingestion/cloud-object-storage/auto-loader/best-practices
 - Update table schemas with schema evolution: https://learn.microsoft.com/en-us/azure/databricks/tables/update-schema
-

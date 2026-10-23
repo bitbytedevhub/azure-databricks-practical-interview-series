@@ -151,4 +151,3 @@ Run:
 ## Checkpoint safety
 
 Do not delete a streaming checkpoint while retaining its target Bronze table unless you deliberately intend to reprocess source files. A checkpoint reset and a target-table reset must be handled as one controlled development recovery procedure.
-

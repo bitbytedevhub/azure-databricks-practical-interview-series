@@ -482,4 +482,3 @@ spark.table(SILVER_DEMO_TABLE).printSchema()
 # MAGIC The Delta destination must separately permit the change, usually through per-write `mergeSchema` or another approved schema update. Prefer per-operation evolution over the legacy session-wide configuration.
 # MAGIC
 # MAGIC Bronze evolution does not automatically evolve Silver or downstream consumers. Explicit selections can omit the field; MERGE can ignore or reject it depending on assignments and evolution settings; streams reading an evolved Delta table must restart; schema updates can conflict with concurrent writes; and views, materialized views, BI models, APIs, and governance contracts may require changes.
-
