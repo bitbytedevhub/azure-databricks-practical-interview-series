@@ -19,12 +19,15 @@ REQUIRED_FILES = [
     "notebooks/day2_and_day3/02_bronze_validation.py",
     "notebooks/day4/01_scd_type1_problem_and_solution.py",
     "notebooks/day5/01_scd_type2_problem_and_solution.py",
+    "notebooks/day6/01_schema_evolution_new_column.py",
     "data/day4/customer_cdc_batch_002.csv",
+    "data/future_scenarios/customers_batch_002.csv",
     "docs/day1-conversational-guide.md",
     "docs/day2-and-day3-part1-ingestion-guide.md",
     "docs/day2-and-day3-part2-validation-guide.md",
     "docs/day4-scd-type1-guide.md",
     "docs/day5-scd-type2-guide.md",
+    "docs/day6-schema-evolution-youtube-script.md",
     "docs/production-mapping.md",
     "docs/workflow-setup.md",
 ]
@@ -66,6 +69,11 @@ CSV_EXPECTATIONS = {
         "ids": {"E0004", "E0005"},
     },
     "data/future_scenarios/customer_with_email.csv": {
+        "rows": 1,
+        "key": "customer_id",
+        "ids": {"C005"},
+    },
+    "data/future_scenarios/customers_batch_002.csv": {
         "rows": 1,
         "key": "customer_id",
         "ids": {"C005"},
@@ -120,7 +128,7 @@ def validate_csv_files() -> None:
             )
 
 
-def validate_day2_through_day5_contracts() -> None:
+def validate_day2_through_day6_contracts() -> None:
     day2_ingestion = (
         ROOT / "notebooks/day2_and_day3/01_bronze_ingestion.py"
     ).read_text(encoding="utf-8")
@@ -129,6 +137,9 @@ def validate_day2_through_day5_contracts() -> None:
     ).read_text(encoding="utf-8")
     day5_scd2 = (
         ROOT / "notebooks/day5/01_scd_type2_problem_and_solution.py"
+    ).read_text(encoding="utf-8")
+    day6_schema_evolution = (
+        ROOT / "notebooks/day6/01_schema_evolution_new_column.py"
     ).read_text(encoding="utf-8")
 
     required_ingestion_patterns = [
@@ -214,17 +225,42 @@ def validate_day2_through_day5_contracts() -> None:
             f"Day 5 SCD Type 2 is missing patterns: {missing_scd2}"
         )
 
+    schema_evolution_patterns = [
+        "cloudFiles.schemaEvolutionMode",
+        '"rescue"',
+        '"none"',
+        '"failOnNewColumns"',
+        '"addNewColumns"',
+        '"addNewColumnsWithTypeWidening"',
+        '"rescuedDataColumn"',
+        '"mergeSchema"',
+        "delta.enableTypeWidening",
+        "CUSTOMER_FIXED_SCHEMA",
+        "SILVER_DEMO_TABLE",
+    ]
+    missing_schema_evolution = [
+        pattern
+        for pattern in schema_evolution_patterns
+        if pattern not in day6_schema_evolution
+    ]
+    if missing_schema_evolution:
+        raise AssertionError(
+            "Day 6 schema evolution is missing patterns: "
+            f"{missing_schema_evolution}"
+        )
+
 
 def main() -> None:
     validate_required_files()
     validate_notebook_syntax()
     validate_csv_files()
-    validate_day2_through_day5_contracts()
+    validate_day2_through_day6_contracts()
     print(
-        "PASS: Day 1 through Day 5 repository "
+        "PASS: Day 1 through Day 6 repository "
         "validation completed."
     )
 
 
 if __name__ == "__main__":
     main()
+
